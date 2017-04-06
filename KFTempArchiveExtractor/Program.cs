@@ -59,7 +59,7 @@ namespace TempArchiveExtractor
                     Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
                     "KF Archive Files");
 
-            if (Directory.Exists(_baseExtractionPath))
+            if (!Directory.Exists(_baseExtractionPath))
             {
                 Directory.CreateDirectory(_baseExtractionPath);
             }
