@@ -31,6 +31,8 @@ namespace TempArchiveExtractor
         /// <param name="args">Application arguments.</param>
         public static void Main(string[] args)
         {
+            Console.WriteLine("KF Temp Archive Extractor 1.2");
+
             if (args.Length != 0)
             {
                 OriginalBehaviour(args);
@@ -53,16 +55,7 @@ namespace TempArchiveExtractor
                 return;
             }
 
-            // If needed, create the sub-folder in application's path
-            _baseExtractionPath =
-                Path.Combine(
-                    Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
-                    "KF Archive Files");
-
-            if (!Directory.Exists(_baseExtractionPath))
-            {
-                Directory.CreateDirectory(_baseExtractionPath);
-            }
+            SetAndCreateBaseExtractionPath();
 
             // Process the files
             foreach (FileInfo archiveFile in archiveFiles)
@@ -78,18 +71,6 @@ namespace TempArchiveExtractor
         #region Methods
 
         /// <summary>
-        /// Retrieves KF installation directory from the system registry.
-        /// </summary>
-        /// <returns>The path to the local KF installation directory.</returns>
-        private static string GetKFInstallDir()
-        {
-            return Microsoft.Win32.Registry.GetValue(
-                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1250",
-                "InstallLocation",
-                null).ToString();
-        }
-
-        /// <summary>
         /// Original behaviour: drag and drop one file onto the executable.
         /// One difference though: the <see cref="Process(FileInfo)"/> function will create a sub-folder per Archive file.
         /// </summary>
@@ -102,12 +83,43 @@ namespace TempArchiveExtractor
                 return;
             }
 
-            FileInfo archiveFile = new FileInfo(args[0]);
+            SetAndCreateBaseExtractionPath();
 
+            FileInfo archiveFile = new FileInfo(args[0]);
             if (!Process(archiveFile))
             {
                 Console.WriteLine($"File {archiveFile.Name} incorrectly processed.");
             }
+        }
+
+        /// <summary>
+        /// Sets the base extraction path, and creates it if it doesn't already exists.
+        /// </summary>
+        private static void SetAndCreateBaseExtractionPath()
+        {
+            // If needed, create the sub-folder in application's path
+            _baseExtractionPath =
+                Path.Combine(
+                    Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                    "KF Archive Files");
+
+            if (!Directory.Exists(_baseExtractionPath))
+            {
+                Console.WriteLine("Creating base extraction directory...");
+                Directory.CreateDirectory(_baseExtractionPath);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves KF installation directory from the system registry.
+        /// </summary>
+        /// <returns>The path to the local KF installation directory.</returns>
+        private static string GetKFInstallDir()
+        {
+            return Microsoft.Win32.Registry.GetValue(
+                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1250",
+                "InstallLocation",
+                null).ToString();
         }
 
         /// <summary>
